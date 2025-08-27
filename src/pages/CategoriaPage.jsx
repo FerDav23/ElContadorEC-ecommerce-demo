@@ -11,6 +11,7 @@ import useAuth from '../hooks/useAuth';
 import LoadingAnimation from '../components/loadingAnimation';
 import './CategoriaPage.css';
 import displayDefault from '../assets/display1.jpeg';
+import useCarrito from '../hooks/useCarrito';
 
 const CategoriaPage = () => {
   const { categoriaId } = useParams(); // Obtiene el ID de la categoría de la URL
@@ -50,6 +51,9 @@ const CategoriaPage = () => {
     loading: subcategoriasLoading,
     error: subcategoriasError
   } = useSubcategorias();
+
+  // Add cart hook
+  const { findCartItemID, increaseItemQuantity, addCartItem, loading: cartLoading, error: cartError } = useCarrito();
   
   // State for expanded services
   const [expandedServices, setExpandedServices] = useState({});
@@ -61,8 +65,8 @@ const CategoriaPage = () => {
   const [quantities, setQuantities] = useState({});
   
   // Loading and error states
-  const loading = itemsLoading || serviciosLoading || categoriasLoading || subcategoriasLoading;
-  const error = itemsError || serviciosError || categoriasError || subcategoriasError;
+  const loading = itemsLoading || serviciosLoading || categoriasLoading || subcategoriasLoading || cartLoading;
+  const error = itemsError || serviciosError || categoriasError || subcategoriasError || cartError;
   
   // Get current category
   const currentCategory = allCategorias.find(c => c.id_categoria === parseInt(categoriaId));
@@ -172,7 +176,7 @@ const CategoriaPage = () => {
   };
   
   // Handle add to cart click
-  const handleAddToCart = (servicioId) => {
+  const handleAddToCart = async (servicioId) => {
     if (!isAuthenticated()) {
       setShowAuthModal(true);
       return;
@@ -184,8 +188,37 @@ const CategoriaPage = () => {
       return;
     }
     
-    // TODO: Implement actual add to cart logic
-    success('Producto agregado al carrito');
+    try {
+      // Find the selected item to get the itemID
+      const selectedSubcategoriaId = selectedPrices[servicioId];
+      const quantity = quantities[servicioId] || 1;
+      
+      // Find the matching item to get the itemID
+      const matchingItem = filteredItems.find(item => 
+        Number(item.id_servicio) === Number(servicioId) && 
+        Number(item.precio) === Number(selectedSubcategoriaId)
+      );
+      
+      if (!matchingItem) {
+        showError('No se pudo encontrar el ítem seleccionado');
+        return;
+      }
+      
+      // Find the cart item ID
+      const cartItemID = await findCartItemID(matchingItem.id_item);
+      
+      // Add item to cart using the hook
+      if (cartItemID.length === 0) {
+        await addCartItem(matchingItem.id_item, quantity, 0); // 0 for no discount
+      } else {
+        const ID = cartItemID[0].cart_items_id;
+        await increaseItemQuantity(ID, quantity);
+      }
+      
+      success('Producto agregado al carrito');
+    } catch (error) {
+      showError('Error al agregar el producto al carrito: ' + error.message);
+    }
   };
   
   // Handle login redirect
@@ -314,9 +347,6 @@ const CategoriaPage = () => {
     }, 300); // Small delay to show loading animation
   };
   
-  if (loading || isNavigating) {
-    return <LoadingAnimation />;
-  }
   
   if (error) {
     return (
@@ -336,6 +366,7 @@ const CategoriaPage = () => {
   
   return (
     <div className="categoria-page-container">
+      <LoadingAnimation visible={loading || isNavigating} />
       <h1 className="categoria-title-centered">{currentCategory.nombre}</h1>
       <div className="services-list">
         {categoryServices.length === 0 ? (
@@ -406,9 +437,9 @@ const CategoriaPage = () => {
                 <button 
                   className="service-card-cart-btn"
                   onClick={() => handleAddToCart(servicio.id_servicio)}
-                  disabled={isAuthenticated() && (!selectedPrices[servicio.id_servicio] || selectedPrices[servicio.id_servicio] <= 0)}
+                  disabled={cartLoading}
                 >
-                    Agregar al carrito <i className="fa fa-shopping-cart"></i>
+                    {cartLoading ? 'Agregando...' : 'Agregar al carrito'} <i className="fa fa-shopping-cart"></i>
                   </button>
               </div>
             </div>

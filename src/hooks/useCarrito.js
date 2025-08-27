@@ -37,7 +37,7 @@ const useCarrito = () => {
       if (!user.id) {
         throw new Error('Invalid user data');
       }
-      console.log(user.cartID);
+
       const response = await fetch(`${API_BASE_URL}/getAll/${user.cartID}`, {
         method: 'GET',
         headers: {
@@ -124,14 +124,105 @@ const useCarrito = () => {
     }
   };
 
-  
+  const findCartItemID = async (itemID) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { user, token } = loadUserToken();
+
+      const response = await fetch(`${API_BASE_URL}/findCartItemID/${user.cartID}/${itemID}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (err) {
+      setError(err.message || 'An error occurred finding the cart item ID');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const increaseItemQuantity = async (cartItemID, quantity) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { user, token } = loadUserToken();
+
+      const response = await fetch(`${API_BASE_URL}/increaseItemQuantity`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cartItemID: cartItemID, quantity: quantity })
+      });
+
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (err) {
+      setError(err.message || 'An error occurred updating the cart item quantity');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const decreaseItemQuantity = async (cartItemID) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { user, token } = loadUserToken();
+
+      const response = await fetch(`${API_BASE_URL}/decreaseItemQuantity`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cartItemID: cartItemID})
+      });
+
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (err) {
+      setError(err.message || 'An error occurred updating the cart item quantity');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return {
     loading,
     error,
     getAllCartItems,
     deleteCartItem,
-    addCartItem
+    addCartItem,
+    findCartItemID,
+    increaseItemQuantity,
+    decreaseItemQuantity
   };
 };
 

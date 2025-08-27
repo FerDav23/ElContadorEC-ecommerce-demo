@@ -2,7 +2,11 @@ import React from 'react';
 import Lottie from 'lottie-react';
 import loadingAnimation from '../assets/loadingAnimation2.json';
 
-const LoadingAnimation = () => {
+const LoadingAnimation = ({ visible = false }) => {
+  if (!visible) {
+    return null;
+  }
+
   return (
     <div style={{
       position: 'fixed',
