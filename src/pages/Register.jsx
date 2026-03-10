@@ -64,44 +64,33 @@ const Register = () => {
     
     // Names validation
     if (!formData.nombres.trim()) {
-      errors.nombres = 'El nombre es requerido';
+      errors.nombres = 'First name is required';
     }
-    
     if (!formData.apellidos.trim()) {
-      errors.apellidos = 'El apellido es requerido';
+      errors.apellidos = 'Last name is required';
     }
-    
-    // Document validation
     if (!formData.numero_documento.trim()) {
-      errors.numero_documento = 'El número de documento es requerido';
+      errors.numero_documento = 'Document number is required';
     } else if (!/^\d+$/.test(formData.numero_documento)) {
-      errors.numero_documento = 'El número de documento debe contener solo dígitos';
+      errors.numero_documento = 'Document number must contain only digits';
     }
-    
-    // Phone validation
     if (!formData.telefono.trim()) {
-      errors.telefono = 'El teléfono es requerido';
+      errors.telefono = 'Phone is required';
     } else if (!/^\d{7,15}$/.test(formData.telefono.replace(/\D/g, ''))) {
-      errors.telefono = 'El teléfono debe tener entre 7 y 15 dígitos';
+      errors.telefono = 'Phone must have 7 to 15 digits';
     }
-    
-    // Email validation
     if (!formData.correo) {
-      errors.correo = 'El correo electrónico es requerido';
+      errors.correo = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.correo)) {
-      errors.correo = 'El correo electrónico no es válido';
+      errors.correo = 'Please enter a valid email';
     }
-    
-    // Password validation
     if (!formData.password) {
-      errors.password = 'La contraseña es requerida';
+      errors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      errors.password = 'La contraseña debe tener al menos 6 caracteres';
+      errors.password = 'Password must be at least 6 characters';
     }
-    
-    // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Las contraseñas no coinciden';
+      errors.confirmPassword = 'Passwords do not match';
     }
     
     setFormErrors(errors);
@@ -123,13 +112,13 @@ const Register = () => {
         const result = await register(userData);
         
         if (!result.success) {
-          setRegisterError(result.error || 'Error al registrar usuario. Inténtalo de nuevo.');
+          setRegisterError(result.error || 'Registration failed. Please try again.');
         } else {
           // Mark registration as complete to prevent automatic redirect
           setIsRegistrationComplete(true);
           
           // Show success message
-          setRegisterSuccess(`¡Registro exitoso! Bienvenido/a ${userData.nombres}`);
+          setRegisterSuccess(`Registration successful! Welcome, ${userData.nombres}`);
           
           // Wait 2 seconds before redirecting to thank you page
           setTimeout(() => {
@@ -137,7 +126,7 @@ const Register = () => {
           }, 2000);
         }
       } catch (error) {
-        setRegisterError('Error al conectar con el servidor. Inténtalo de nuevo.');
+        setRegisterError('Error connecting to the server. Please try again.');
         console.error('Register error:', error);
       } finally {
         setIsSubmitting(false);
@@ -149,8 +138,8 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-card register-card">
         <div className="auth-header">
-          <h2>Crear Cuenta</h2>
-          <p>Complete el formulario para registrarse</p>
+          <h2>Create Account</h2>
+          <p>Complete the form to register</p>
         </div>
         
         {registerError && (
@@ -169,7 +158,7 @@ const Register = () => {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="nombres">
-                <FontAwesomeIcon icon={faUser} /> Nombres
+                <FontAwesomeIcon icon={faUser} /> First name
               </label>
               <input
                 type="text"
@@ -177,7 +166,7 @@ const Register = () => {
                 name="nombres"
                 value={formData.nombres}
                 onChange={handleChange}
-                placeholder="Nombres"
+                placeholder="First name"
                 className={formErrors.nombres ? 'error' : ''}
               />
               {formErrors.nombres && <div className="field-error">{formErrors.nombres}</div>}
@@ -185,7 +174,7 @@ const Register = () => {
             
             <div className="form-group">
               <label htmlFor="apellidos">
-                <FontAwesomeIcon icon={faUser} /> Apellidos
+                <FontAwesomeIcon icon={faUser} /> Last name
               </label>
               <input
                 type="text"
@@ -193,7 +182,7 @@ const Register = () => {
                 name="apellidos"
                 value={formData.apellidos}
                 onChange={handleChange}
-                placeholder="Apellidos"
+                placeholder="Last name"
                 className={formErrors.apellidos ? 'error' : ''}
               />
               {formErrors.apellidos && <div className="field-error">{formErrors.apellidos}</div>}
@@ -203,7 +192,7 @@ const Register = () => {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="tipo_documento">
-                <FontAwesomeIcon icon={faIdCard} /> Tipo de Documento
+                <FontAwesomeIcon icon={faIdCard} /> Document type
               </label>
               <select
                 id="tipo_documento"
@@ -212,16 +201,16 @@ const Register = () => {
                 onChange={handleChange}
                 className={formErrors.tipo_documento ? 'error' : ''}
               >
-                <option value="cedula">Cédula</option>
-                <option value="pasaporte">Pasaporte</option>
-                <option value="ruc">RUC</option>
+                <option value="cedula">ID</option>
+                <option value="pasaporte">Passport</option>
+                <option value="ruc">Tax ID</option>
               </select>
               {formErrors.tipo_documento && <div className="field-error">{formErrors.tipo_documento}</div>}
             </div>
             
             <div className="form-group">
               <label htmlFor="numero_documento">
-                <FontAwesomeIcon icon={faIdCard} /> Número de Documento
+                <FontAwesomeIcon icon={faIdCard} /> Document number
               </label>
               <input
                 type="text"
@@ -229,7 +218,7 @@ const Register = () => {
                 name="numero_documento"
                 value={formData.numero_documento}
                 onChange={handleChange}
-                placeholder="Número de documento"
+                placeholder="Document number"
                 className={formErrors.numero_documento ? 'error' : ''}
               />
               {formErrors.numero_documento && <div className="field-error">{formErrors.numero_documento}</div>}
@@ -238,7 +227,7 @@ const Register = () => {
           
           <div className="form-group">
             <label htmlFor="telefono">
-              <FontAwesomeIcon icon={faPhone} /> Teléfono
+              <FontAwesomeIcon icon={faPhone} /> Phone
             </label>
             <input
               type="tel"
@@ -246,7 +235,7 @@ const Register = () => {
               name="telefono"
               value={formData.telefono}
               onChange={handleChange}
-              placeholder="Teléfono"
+              placeholder="Phone"
               className={formErrors.telefono ? 'error' : ''}
             />
             {formErrors.telefono && <div className="field-error">{formErrors.telefono}</div>}
@@ -254,7 +243,7 @@ const Register = () => {
           
           <div className="form-group">
             <label htmlFor="correo">
-              <FontAwesomeIcon icon={faEnvelope} /> Correo Electrónico
+              <FontAwesomeIcon icon={faEnvelope} /> Email
             </label>
             <input
               type="email"
@@ -262,7 +251,7 @@ const Register = () => {
               name="correo"
               value={formData.correo}
               onChange={handleChange}
-              placeholder="correo@ejemplo.com"
+              placeholder="email@example.com"
               className={formErrors.correo ? 'error' : ''}
               autoComplete="email"
             />
@@ -272,7 +261,7 @@ const Register = () => {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="password">
-                <FontAwesomeIcon icon={faLock} /> Contraseña
+                <FontAwesomeIcon icon={faLock} /> Password
               </label>
               <input
                 type="password"
@@ -280,7 +269,7 @@ const Register = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Contraseña"
+                placeholder="Password"
                 className={formErrors.password ? 'error' : ''}
                 autoComplete="new-password"
               />
@@ -289,7 +278,7 @@ const Register = () => {
             
             <div className="form-group">
               <label htmlFor="confirmPassword">
-                <FontAwesomeIcon icon={faLock} /> Confirmar Contraseña
+                <FontAwesomeIcon icon={faLock} /> Confirm password
               </label>
               <input
                 type="password"
@@ -297,7 +286,7 @@ const Register = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                placeholder="Confirmar contraseña"
+                placeholder="Confirm password"
                 className={formErrors.confirmPassword ? 'error' : ''}
                 autoComplete="new-password"
               />
@@ -312,18 +301,18 @@ const Register = () => {
           >
             {isSubmitting ? (
               <>
-                <FontAwesomeIcon icon={faSpinner} spin /> Procesando...
+                <FontAwesomeIcon icon={faSpinner} spin /> Registering...
               </>
             ) : (
               <>
-                <FontAwesomeIcon icon={faUserPlus} /> Registrarse
+                <FontAwesomeIcon icon={faUserPlus} /> Register
               </>
             )}
           </button>
         </form>
         
         <div className="auth-footer">
-          <p>¿Ya tienes una cuenta? <Link to="/login">Iniciar Sesión</Link></p>
+          <p>Already have an account? <Link to="/login">Sign in</Link></p>
         </div>
       </div>
     </div>

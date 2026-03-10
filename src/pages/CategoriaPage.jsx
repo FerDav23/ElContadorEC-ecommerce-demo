@@ -188,7 +188,7 @@ const CategoriaPage = () => {
     
     // Check if price is selected for authenticated users
     if (!selectedPrices[servicioId] || selectedPrices[servicioId] <= 0) {
-      showError('Por favor seleccione una subcategoría para obtener el precio');
+      showError('Please select a subcategory to get the price');
       return;
     }
     
@@ -342,7 +342,7 @@ const CategoriaPage = () => {
         // Only update state if component is still mounted
         if (isMounted) {
           if (serviciosResult.error) {
-            showError('Error al cargar los servicios');
+            showError('Error loading services');
           }
           if (itemsResult.error) {
             showError('Error al cargar los ítems');
@@ -434,7 +434,7 @@ const CategoriaPage = () => {
   if (!currentCategory) {
     return (
       <div className="categoria-page-container">
-        <div className="error-message">Categoría no encontrada</div>
+        <div className="error-message">Category not found</div>
       </div>
     );
   }
@@ -445,7 +445,7 @@ const CategoriaPage = () => {
       <h1 className="categoria-title-centered">{currentCategory.nombre}</h1>
       <div className="services-list">
         {categoryServices.length === 0 ? (
-          <p className="no-data">No hay servicios disponibles en esta categoría</p>
+          <p className="no-data">No services available in this category</p>
         ) : (
           getServicesWithItems().map(({ servicio, items, subcategorias, serviceInfo }) => (
             <div key={servicio.id_servicio} className="service-card">
@@ -474,12 +474,12 @@ const CategoriaPage = () => {
               <div className="service-card-details">
                 <h2 className="service-card-title">{serviceInfo.nombre}</h2>
                 <p className="service-card-desc">{serviceInfo.descripcion}</p>
-                <button className="service-card-link" onClick={() => handleVerMas(servicio.id_servicio)}>Ver más</button>
+                <button className="service-card-link" onClick={() => handleVerMas(servicio.id_servicio)}>View more</button>
               </div>
 
               {/* Column 3: Actions */}
               <div className="service-card-actions">
-                <label className="service-card-label">Seleccione un rango de ventas mensuales para obtener un precio</label>
+                <label className="service-card-label">Select a monthly sales range to get a price</label>
                 <select
                   className="service-card-select"
                   defaultValue={subcategorias.length === 1 ? subcategorias[0].id_subcategoria : ""}
@@ -492,7 +492,7 @@ const CategoriaPage = () => {
                   }}
                 >
                   {subcategorias.length > 1 && (
-                    <option value="">Seleccione una subcategoría</option>
+                    <option value="">Select a subcategory</option>
                   )}
                   {subcategorias.map(sub => (
                     <option key={sub.id_subcategoria} value={sub.id_subcategoria}>
@@ -501,7 +501,7 @@ const CategoriaPage = () => {
                   ))}
                 </select>
                 <div className="service-card-qty-row">
-                  <span className="qty-label">necesito</span>
+                  <span className="qty-label">I need</span>
                   <div className="qty-controls">
                     <button className="qty-btn" onClick={() => handleQuantityChange(servicio.id_servicio, -1)} disabled={(quantities[servicio.id_servicio] || 1) <= 1}>-</button>
                     <input className="qty-input" type="text" value={quantities[servicio.id_servicio] || 1} readOnly />
@@ -527,21 +527,21 @@ const CategoriaPage = () => {
         <div className="auth-modal-overlay" onClick={handleCloseAuthModal}>
           <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
             <div className="auth-modal-header">
-              <h2>Iniciar Sesión Requerido</h2>
+              <h2>Sign in required</h2>
               <button className="auth-modal-close" onClick={handleCloseAuthModal}>
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
             <div className="auth-modal-content">
-              <p>Para agregar productos al carrito necesitas tener una cuenta en nuestra plataforma.</p>
+              <p>To add products to the cart you need an account on our platform.</p>
               <div className="auth-modal-buttons">
                 <button className="auth-modal-btn login-btn" onClick={handleLoginRedirect}>
                   <FontAwesomeIcon icon={faSignInAlt} />
-                  Iniciar Sesión
+                  Sign in
                 </button>
                 <button className="auth-modal-btn register-btn" onClick={handleRegisterRedirect}>
                   <FontAwesomeIcon icon={faUserPlus} />
-                  Registrarse
+                  Register
                 </button>
               </div>
             </div>

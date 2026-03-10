@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { API_BASE_URL as BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_CARDS } from '../mock/data.js';
 
 /**
- * Hook personalizado para manejar autenticación de usuarios
- * @returns {Object} - Objeto con funciones y estados de autenticación
+ * Hook for payment cards; uses mock cards in demo mode.
  */
 const usePaymentez = () => {
   const API_BASE_URL = `${BASE_URL}/cards`;
@@ -14,52 +15,40 @@ const usePaymentez = () => {
   const loadUserToken = () => {
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
+      if (!token) throw new Error('Authentication token not found');
       const userStr = localStorage.getItem('user');
-      if (!userStr) {
-        throw new Error('User not found in localStorage');
-      }
+      if (!userStr) throw new Error('User not found in localStorage');
       return { user: JSON.parse(userStr), token };
     } catch (err) {
       setError(err.message);
-      throw err; // Re-throw to handle in getAllCards
+      throw err;
     }
   };
 
   const getAllCards = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
-      const { user, token } = loadUserToken();
-      
-      if (!user.id) {
-        throw new Error('Invalid user data');
+      const { user } = loadUserToken();
+      if (!user.id) throw new Error('Invalid user data');
+      if (IS_DEMO_MODE) {
+        const list = MOCK_CARDS[user.id] || [];
+        const data = Array.isArray(list) ? list : list.cards || [];
+        setCards(data);
+        setLoading(false);
+        return data;
       }
-
       const response = await fetch(`${API_BASE_URL}/all/${user.id}`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${loadUserToken().token}`, 'Content-Type': 'application/json' }
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      
-      setCards(data);
+      setCards(Array.isArray(data) ? data : data.cards || []);
       return data;
-    } catch (error) {
-      // Error loading cards - handle silently or with proper error state
+    } catch (err) {
       setCards([]);
-      setError(error.message || 'An error occurred while fetching cards');
+      setError(err.message || 'An error occurred while fetching cards');
       return null;
     } finally {
       setLoading(false);
@@ -67,26 +56,20 @@ const usePaymentez = () => {
   };
 
   const deleteCard = async (cardToken) => {
+    if (IS_DEMO_MODE) {
+      setCards((prev) => prev.filter((c) => c.token !== cardToken));
+      return { success: true };
+    }
     try {
       setLoading(true);
       setError(null);
-
       const { user, token } = loadUserToken();
-
       const response = await fetch(`${API_BASE_URL}/deleteCard`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ cardToken: cardToken, userID: user.id })
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardToken, userID: user.id })
       });
-
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       return response.json();
     } catch (err) {
       setError(err.message || 'An error occurred while deleting the card');
@@ -97,26 +80,19 @@ const usePaymentez = () => {
   };
 
   const debitPaymentWithToken = async (order, card) => {
+    if (IS_DEMO_MODE) {
+      return { success: true, message: 'Demo payment simulated' };
+    }
     try {
       setLoading(true);
       setError(null);
-
       const { user, token } = loadUserToken();
-
       const response = await fetch(`${API_BASE_URL}/debitWithToken`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ order: order, user: user, card: card })
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order, user, card })
       });
-
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       return response.json();
     } catch (err) {
       setError(err.message || 'An error occurred submitting the payment');

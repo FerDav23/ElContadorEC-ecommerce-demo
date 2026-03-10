@@ -12,6 +12,8 @@ import useCategorias from '../hooks/useCategorias';
 import useAuth from '../hooks/useAuth';
 import useNotifications from '../hooks/useNotifications';
 import LoadingAnimation from '../components/loadingAnimation';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_CARACTERISTICAS_BY_SERVICIO, MOCK_ITEMS, MOCK_SUBCATEGORIAS } from '../mock/data.js';
 import './ServicioPage.css';
 
 // Mapa de iconos para convertir nombres de string a componentes de FontAwesome
@@ -50,15 +52,17 @@ const ServicioPage = () => {
   // Fetch caracteristicas for this servicio
   useEffect(() => {
     const fetchCaracteristicas = async () => {
+      setLoading(true);
+      if (IS_DEMO_MODE && id_servicio) {
+        const sid = parseInt(id_servicio);
+        setCaracteristicas(MOCK_CARACTERISTICAS_BY_SERVICIO[sid] || []);
+        setError(null);
+        setLoading(false);
+        return;
+      }
       try {
-        setLoading(true);
-        // 1. Primero obtener las relaciones de servicio_caracteristicas
         const response = await fetch(`/api/servicios/${id_servicio}/caracteristicas`);
-        
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const data = await response.json();
         setCaracteristicas(data);
         setError(null);
@@ -71,28 +75,28 @@ const ServicioPage = () => {
       }
     };
 
-    if (id_servicio) {
-      fetchCaracteristicas();
-    }
+    if (id_servicio) fetchCaracteristicas();
   }, [id_servicio]);
 
   // Fetch items (subcategories) for this servicio
   useEffect(() => {
     const fetchServicioItems = async () => {
+      if (IS_DEMO_MODE && id_servicio) {
+        const sid = parseInt(id_servicio);
+        const items = MOCK_ITEMS.filter((i) => i.id_servicio === sid).map((item) => {
+          const sub = MOCK_SUBCATEGORIAS.find((s) => s.id_subcategoria === item.id_subcategoria);
+          return { ...item, Subcategoria: sub };
+        });
+        setServicioItems(items);
+        if (items.length > 0) setSelectedSubcategory(items[0]);
+        return;
+      }
       try {
         const response = await fetch(`/api/items/servicio/${id_servicio}`);
-        
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const data = await response.json();
         setServicioItems(data);
-        
-        // Set the first item as selected by default
-        if (data.length > 0) {
-          setSelectedSubcategory(data[0]);
-        }
+        if (data.length > 0) setSelectedSubcategory(data[0]);
       } catch (err) {
         console.error('Error fetching servicio items:', err);
         setError(err.message);
@@ -100,29 +104,26 @@ const ServicioPage = () => {
       }
     };
 
-    if (id_servicio) {
-      fetchServicioItems();
-    }
+    if (id_servicio) fetchServicioItems();
   }, [id_servicio]);
 
   // Fetch random banner image
   useEffect(() => {
+    if (IS_DEMO_MODE) {
+      setBannerImage(null);
+      return;
+    }
     const fetchRandomBanner = async () => {
       try {
         const response = await fetch('/api/banners/random');
-        
         if (response.ok) {
           const data = await response.json();
-          if (data.success && data.data) {
-            setBannerImage(data.data.url);
-          }
+          if (data.success && data.data && data.data.url) setBannerImage(data.data.url);
         }
       } catch (err) {
         console.error('Error fetching banner:', err);
-        // Don't set error state for banner failures - just don't show banner
       }
     };
-
     fetchRandomBanner();
   }, []);
 
@@ -196,7 +197,7 @@ const ServicioPage = () => {
     return (
       <div className="servicio-page-container">
         <div className="error-container">
-          Servicio o categoría no encontrada
+          Service or category not found
         </div>
       </div>
     );
@@ -246,7 +247,7 @@ const ServicioPage = () => {
                   ))}
             </select>
             <div className="quantity-container">
-              <span className="quantity-text">necesito</span>
+              <span className="quantity-text">I need</span>
               <button 
                 className="quantity-button" 
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
@@ -332,21 +333,21 @@ const ServicioPage = () => {
         <div className="auth-modal-overlay" onClick={handleCloseAuthModal}>
           <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
             <div className="auth-modal-header">
-              <h2>Iniciar Sesión Requerido</h2>
+              <h2>Sign in required</h2>
               <button className="auth-modal-close" onClick={handleCloseAuthModal}>
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
             <div className="auth-modal-content">
-              <p>Para agregar productos al carrito necesitas tener una cuenta en nuestra plataforma.</p>
+              <p>To add products to the cart you need an account on our platform.</p>
               <div className="auth-modal-buttons">
                 <button className="auth-modal-btn login-btn" onClick={handleLoginRedirect}>
                   <FontAwesomeIcon icon={faSignInAlt} />
-                  Iniciar Sesión
+                  Sign in
                 </button>
                 <button className="auth-modal-btn register-btn" onClick={handleRegisterRedirect}>
                   <FontAwesomeIcon icon={faUserPlus} />
-                  Registrarse
+                  Register
                 </button>
               </div>
             </div>

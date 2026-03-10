@@ -79,45 +79,6 @@ const CARD_BRANDS = {
     }
 };
 
-const cardsDummy = {
-    "cards": [
-        {
-            "bin": "511915",
-            "status": "review",
-            "token": "17121538682542236138",
-            "holder_name": "citlali calderon",
-            "expiry_year": "2020",
-            "expiry_month": "9",
-            "transaction_reference": "CI-473",
-            "type": "vi",
-            "number": "7991"
-        },
-        {
-            "bin": "422023",
-            "status": "valid",
-            "token": "15363681013452573066",
-            "holder_name": "citlali calderon",
-            "expiry_year": "2020",
-            "expiry_month": "9",
-            "transaction_reference": null,
-            "type": "mc",
-            "number": "8431"
-        },
-        {
-            "bin": "453254",
-            "status": "valid",
-            "token": "10135134879450157925",
-            "holder_name": "citlali calderon",
-            "expiry_year": "2020",
-            "expiry_month": "9",
-            "transaction_reference": null,
-            "type": "vi",
-            "number": "8311"
-        }
-    ],
-    "result_size": 3
-}
-
 const Cards = ({ facturaFormValues, onPaymentSubmit }) => {
     const { loading, error, getAllCards, deleteCard, debitPaymentWithToken } = usePaymentez();
     const [selectedCardToken, setSelectedCardToken] = useState(null);
@@ -128,15 +89,13 @@ const Cards = ({ facturaFormValues, onPaymentSubmit }) => {
     
     const loadCards = async () => {
         try {
-            console.log("Loading cards...");
             setLocalError(null);
             const response = await getAllCards();
-            // Ensure we always have a valid cards object structure
-            setCards(response && typeof response === 'object' ? response : { cards: [] });
-            console.log("Cards loaded:", response);
+            const normalized = Array.isArray(response) ? { cards: response } : (response && typeof response === 'object' ? response : { cards: [] });
+            setCards(normalized);
         } catch (err) {
             console.error('Error loading cards:', err);
-            setLocalError('Error al cargar las tarjetas. Por favor, intente nuevamente.');
+            setLocalError('Error loading cards. Please try again.');
             setCards({ cards: [] });
         }
     };

@@ -1,10 +1,11 @@
 import React from 'react';
 import logoSmall from '../assets/logo-small.png';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaAngleRight } from 'react-icons/fa';
+import { IS_DEMO_MODE } from '../config/demo.js';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="footer">
       <div className="footer-top-wave"></div>
@@ -14,7 +15,7 @@ const Footer = () => {
             <img src={logoSmall} alt="El Contador EC Logo" className="logo-small" />
           </div>
           <p className="footer-description">
-            Brindamos servicios contables profesionales y personalizados para empresas y personas naturales. Nuestra misión es simplificar la contabilidad con soluciones eficientes y confiables.
+            We provide professional, tailored accounting services for businesses and individuals. Our mission is to simplify accounting with efficient, reliable solutions.
           </p>
           <div className="footer-social">
             <a href="https://facebook.com" className="social-icon" target="_blank" rel="noopener noreferrer">
@@ -33,19 +34,19 @@ const Footer = () => {
         </div>
         
         <div className="footer-column footer-links">
-          <h3 className="footer-title">Enlaces Rápidos</h3>
+          <h3 className="footer-title">Quick Links</h3>
           <ul>
             <li>
               <FaAngleRight className="footer-icon" />
-              <a href="/">Inicio</a>
+              <a href="/">Home</a>
             </li>
             <li>
               <FaAngleRight className="footer-icon" />
-              <a href="/nosotros">Sobre Nosotros</a>
+              <a href="/nosotros">About Us</a>
             </li>
             <li>
               <FaAngleRight className="footer-icon" />
-              <a href="/servicios">Servicios</a>
+              <a href="/servicios">Services</a>
             </li>
             <li>
               <FaAngleRight className="footer-icon" />
@@ -53,13 +54,13 @@ const Footer = () => {
             </li>
             <li>
               <FaAngleRight className="footer-icon" />
-              <a href="/contacto">Contacto</a>
+              <a href="/contacto">Contact</a>
             </li>
           </ul>
         </div>
         
         <div className="footer-column footer-services">
-          <h3 className="footer-title">Nuestros Servicios</h3>
+          <h3 className="footer-title">Our Services</h3>
           <ul>
             <li>
               <FaAngleRight className="footer-icon" />
@@ -85,7 +86,7 @@ const Footer = () => {
         </div>
         
         <div className="footer-column footer-contact">
-          <h3 className="footer-title">Contáctanos</h3>
+          <h3 className="footer-title">Contact Us</h3>
           <div className="contact-item">
             <FaMapMarkerAlt className="footer-icon" />
             <p>Av. Francisco de Orellana y Juan Tanca Marengo, Guayaquil, Ecuador</p>
@@ -106,11 +107,12 @@ const Footer = () => {
       </div>
       
       <div className="footer-bottom">
-        <p>&copy; {currentYear} El Contador EC. Todos los derechos reservados.</p>
+        {IS_DEMO_MODE && <p className="footer-demo-notice">Demo version – for presentation only.</p>}
+        <p>&copy; {currentYear} El Contador EC. All rights reserved.</p>
         <div className="footer-bottom-links">
-          <a href="/terminos">Términos y Condiciones</a>
-          <a href="/privacidad">Política de Privacidad</a>
-          <a href="/cookies">Política de Cookies</a>
+          <a href="/terminos">Terms and Conditions</a>
+          <a href="/privacidad">Privacy Policy</a>
+          <a href="/cookies">Cookie Policy</a>
         </div>
       </div>
     </footer>

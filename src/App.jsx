@@ -40,15 +40,24 @@ import CategoriaPage from './pages/CategoriaPage';
 import Carrito from './pages/Carrito';
 import Perfil from './pages/Perfil';
 import ServicioPage from './pages/ServicioPage';
-// Import components
+import DemoLanding from './pages/DemoLanding';
 import Navbar from './components/Navbar';
-// Import hooks
 import useAuth from './hooks/useAuth';
 import useCategorias from './hooks/useCategorias';
 import LoadingAnimation from './components/loadingAnimation';
 import { useAllServicios } from './hooks/useServicios';
 import { commonIcons } from './components/admin/utils/commonIcons.jsx';
-import './App.css'; // Make sure we have access to the styles
+import { IS_DEMO_MODE } from './config/demo.js';
+import './App.css';
+
+// Root route: in demo mode and not logged in, show DemoLanding; otherwise Home
+const RootRoute = () => {
+  const { isAuthenticated } = useAuth();
+  if (IS_DEMO_MODE && !isAuthenticated()) {
+    return <DemoLanding />;
+  }
+  return <Home />;
+};
 
 // Home component for the landing page
 const Home = () => {
@@ -74,7 +83,7 @@ const Home = () => {
     return (
       <main className="main-content">
         <div className="error-container">
-          <p>Error al cargar las categorías: {error}</p>
+          <p>Error loading categories: {error}</p>
         </div>
       </main>
     );
@@ -83,7 +92,7 @@ const Home = () => {
   return (
     <main className="main-content">
       <section className="categories-section">
-        <h2 className="section-title">Todas las Categorías</h2>
+        <h2 className="section-title">All Categories</h2>
         
         <div className="categories-container">
           <div className="categories-grid">
@@ -143,7 +152,7 @@ const FooterWrapper = () => {
             <img src={fullLogoImage} alt="El Contador EC" className="logo-small" />
           </div>
           <p className="footer-description">
-            Somos expertos en servicios contables y tributarios, ofreciendo soluciones personalizadas para individuos y empresas en Ecuador.
+            We are experts in accounting and tax services, offering tailored solutions for individuals and businesses in Ecuador.
           </p>
           <div className="footer-social">
             <a href="#" className="social-icon facebook"><i className="fab fa-facebook-f"></i></a>
@@ -154,67 +163,67 @@ const FooterWrapper = () => {
         </div>
         
         <div className="footer-column footer-links">
-          <h4 className="footer-title">Enlaces Rápidos</h4>
+          <h4 className="footer-title">Quick Links</h4>
           <ul>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/">Inicio</Link>
+              <Link to="/">Home</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/servicios">Servicios</Link>
+              <Link to="/servicios">Services</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/nosotros">Nosotros</Link>
+              <Link to="/nosotros">About Us</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/planes">Planes y Precios</Link>
+              <Link to="/planes">Plans and Pricing</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/faq">Preguntas Frecuentes</Link>
+              <Link to="/faq">FAQ</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/contacto">Contacto</Link>
+              <Link to="/contacto">Contact</Link>
             </li>
           </ul>
         </div>
         
         <div className="footer-column footer-services">
-          <h4 className="footer-title">Nuestros Servicios</h4>
+          <h4 className="footer-title">Our Services</h4>
           <ul>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/categoria/2">Declaraciones Mensuales</Link>
+              <Link to="/categoria/2">Monthly Returns</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/categoria/2">Declaraciones Anuales</Link>
+              <Link to="/categoria/2">Annual Returns</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/categoria/1">Impuesto a la Renta</Link>
+              <Link to="/categoria/1">Income Tax</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/categoria/5">Devoluciones SRI</Link>
+              <Link to="/categoria/5">SRI Refunds</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/categoria/3">Auditoría Externa</Link>
+              <Link to="/categoria/3">External Audit</Link>
             </li>
             <li>
               <FontAwesomeIcon icon={faChevronRight} className="footer-icon" />
-              <Link to="/categoria/4">Servicios Legales</Link>
+              <Link to="/categoria/4">Legal Services</Link>
             </li>
           </ul>
         </div>
         
         <div className="footer-column footer-contact">
-          <h4 className="footer-title">Contáctanos</h4>
+          <h4 className="footer-title">Contact Us</h4>
           <div className="contact-info">
             <p>
               <FontAwesomeIcon icon={faMapMarkerAlt} className="contact-icon" />
@@ -238,11 +247,11 @@ const FooterWrapper = () => {
       
       <div className="footer-bottom">
         <div className="copyright">
-          &copy; {new Date().getFullYear()} El Contador EC. Todos los derechos reservados.
+          &copy; {new Date().getFullYear()} El Contador EC. All rights reserved.
         </div>
         <div className="footer-bottom-links">
-          <Link to="/terminos">Términos y Condiciones</Link>
-          <Link to="/privacidad">Política de Privacidad</Link>
+          <Link to="/terminos">Terms and Conditions</Link>
+          <Link to="/privacidad">Privacy Policy</Link>
         </div>
       </div>
     </footer>
@@ -273,7 +282,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    window.location.replace('/');
   };
 
   const handleSearchChange = (e) => {
@@ -320,7 +329,7 @@ const Header = () => {
         <form onSubmit={handleSearchSubmit} className="search-form">
           <input 
             type="text" 
-            placeholder="Busca tu servicio contable..." 
+            placeholder="Search for your accounting service..." 
             className="search-input"
             value={searchInput}
             onChange={handleSearchChange}
@@ -346,7 +355,7 @@ const Header = () => {
               ))
             ) : (
               <div className="suggestion-item no-results">
-                No se encontraron resultados
+                No results found
               </div>
             )}
           </div>
@@ -356,18 +365,18 @@ const Header = () => {
         {forceAuthenticated ? (
           <div className="user-actions-row">
             <Link to="/carrito" className="orders-link">
-              <span>Mis órdenes</span>
+              <span>My orders</span>
               <FontAwesomeIcon icon={faShoppingCart} className="cart-icon" />
             </Link>
             <span className="user-divider">|</span>
             <Link to="/perfil" className="user-greeting">
-              <span>Hola,</span>
-              <span className="user-name">{user?.nombres?.split(' ')[0] || 'Jefferson'}</span>
+              <span>Hi,</span>
+              <span className="user-name">{user?.nombres?.split(' ')[0] || 'User'}</span>
               <span className="user-avatar">
                 <FontAwesomeIcon icon={faUser} />
               </span>
             </Link>
-            <button onClick={handleLogout} className="logout-link" title="Salir">
+            <button onClick={handleLogout} className="logout-link" title="Sign out">
               <FontAwesomeIcon icon={faSignOutAlt} />
             </button>
           </div>
@@ -376,13 +385,13 @@ const Header = () => {
             <Link to="/login" className="user-button">
               <div className="button-content">
                 <FontAwesomeIcon icon={faSignInAlt} className="user-icon" />
-                <span>Ingresar</span>
+                <span>Sign in</span>
               </div>
             </Link>
             <Link to="/register" className="register-button">
               <div className="button-content">
                 <FontAwesomeIcon icon={faUserPlus} className="register-icon" />
-                <span>Registrarse</span>
+                <span>Register</span>
               </div>
             </Link>
           </>
@@ -396,12 +405,17 @@ function App() {
   return (
     <Router>
       <div className="app">
+        {IS_DEMO_MODE && (
+          <div className="demo-banner" role="banner">
+            This is a demo. No real data or payments are used.
+          </div>
+        )}
         <Header />
         
         <NavbarWrapper />
         
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/categoria/:categoriaId" element={<CategoriaPage />} />
           <Route path="/carrito" element={<Carrito />} />
           <Route path="/perfil" element={<Perfil />} />

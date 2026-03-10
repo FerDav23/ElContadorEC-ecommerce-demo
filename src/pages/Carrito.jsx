@@ -27,8 +27,8 @@ const validationSchema = Yup.object().shape({
     .required('La cédula o RUC es requerido')
     .matches(/^[0-9]{10,13}$/, 'La cédula o RUC debe tener entre 10 y 13 dígitos'),
   telefono: Yup.string()
-    .required('El teléfono es requerido')
-    .matches(/^[0-9]{10}$/, 'El teléfono debe tener 10 dígitos')
+    .required('Phone is required')
+    .matches(/^[0-9]{10}$/, 'Phone must have 10 digits')
 });
 
 const Carrito = () => {
@@ -101,7 +101,7 @@ const Carrito = () => {
       // Could redirect to success page or show success message
     } else {
       // Handle payment error
-      setPaymentError(paymentResult.error || 'Error en el proceso de pago');
+      setPaymentError(paymentResult.error || 'Payment process error');
     }
   };
 
@@ -139,7 +139,7 @@ const Carrito = () => {
         <div className="carrito-items-container">
           <div className="carrito-header">
             <h1 style={{ fontSize: '2rem', fontWeight: 700, color: '#222', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
-              Mi Carrito
+              My Cart
               <span style={{
                 background: '#e0e0e0',
                 color: '#444',
@@ -265,7 +265,7 @@ const Carrito = () => {
                   return (
                     <Form>
                       <div className="form-group">
-                        <label htmlFor="nombres">Nombres</label>
+                        <label htmlFor="nombres">First name</label>
                         <Field
                           type="text"
                           id="nombres"
@@ -276,7 +276,7 @@ const Carrito = () => {
                       </div>
                       
                       <div className="form-group">
-                        <label htmlFor="apellidos">Apellidos</label>
+                        <label htmlFor="apellidos">Last name</label>
                         <Field
                           type="text"
                           id="apellidos"
@@ -287,7 +287,7 @@ const Carrito = () => {
                       </div>
                       
                       <div className="form-group">
-                        <label htmlFor="cedula">Cédula o RUC</label>
+                        <label htmlFor="cedula">ID or Tax ID</label>
                         <Field
                           type="text"
                           id="cedula"
@@ -298,7 +298,7 @@ const Carrito = () => {
                       </div>
                       
                       <div className="form-group">
-                        <label htmlFor="telefono">Número de teléfono</label>
+                        <label htmlFor="telefono">Phone number</label>
                         <Field
                           type="text"
                           id="telefono"

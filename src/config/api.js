@@ -1,4 +1,6 @@
 // API Configuration
+import { IS_DEMO_MODE } from './demo.js';
+
 // 🔧 MANUAL SWITCH: Change this line to switch environments
 // Options: 'development' | 'production'
 const MANUAL_ENVIRONMENT = 'production'; // 👈 Change this to 'production' to use EC2 backend
@@ -15,18 +17,11 @@ const BACKEND_SERVERS = {
     BASE_URL: '/api',
     BACKEND_URL: 'https://api.elcontadorec.store'
   },
-  // You can add more environments here:
-  // staging: {
-  //   BASE_URL: 'http://your-staging-server.com/api',
-  //   BACKEND_URL: 'http://your-staging-server.com'
-  // }
 };
 
 export const API_CONFIG = {
   ENVIRONMENT,
   ...BACKEND_SERVERS[ENVIRONMENT],
-  
-  // Helper method to get current environment info
   getCurrentEnvironment: () => ({
     environment: ENVIRONMENT,
     isProduction: ENVIRONMENT === 'production',
@@ -34,10 +29,14 @@ export const API_CONFIG = {
   })
 };
 
-export const API_BASE_URL = `${API_CONFIG.BACKEND_URL}${API_CONFIG.BASE_URL}`;
+// In demo mode we do not call the real backend; this is only for non-demo fallback
+export const API_BASE_URL = IS_DEMO_MODE
+  ? ''
+  : `${API_CONFIG.BACKEND_URL}${API_CONFIG.BASE_URL}`;
 
-// Log current configuration for debugging
-console.log(`🔧 API Config - Environment: ${ENVIRONMENT}`, {
-  BASE_URL: API_CONFIG.BASE_URL,
-  BACKEND_URL: API_CONFIG.BACKEND_URL
-}); 
+if (!IS_DEMO_MODE) {
+  console.log(`🔧 API Config - Environment: ${ENVIRONMENT}`, {
+    BASE_URL: API_CONFIG.BASE_URL,
+    BACKEND_URL: API_CONFIG.BACKEND_URL
+  });
+} 

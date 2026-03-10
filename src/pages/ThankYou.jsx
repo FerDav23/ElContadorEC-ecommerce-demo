@@ -27,7 +27,7 @@ const ThankYou = () => {
   }, [isAuthenticated, navigate, location.state]);
 
   // Extract first name - prioritize data from useAuth, then navigation state
-  const firstName = user?.nombres?.split(' ')[0] || userData?.nombres?.split(' ')[0] || 'Usuario';
+  const firstName = user?.nombres?.split(' ')[0] || userData?.nombres?.split(' ')[0] || 'User';
 
   return (
     <div className="auth-container">
@@ -37,19 +37,19 @@ const ThankYou = () => {
         </div>
         
         <div className="auth-header">
-          <h2>¡Registro Exitoso!</h2>
-          <p>Gracias por unirte a El Contador EC</p>
+          <h2>Registration successful!</h2>
+          <p>Thank you for joining El Contador EC</p>
         </div>
         
         <div className="thank-you-message">
-          <p>¡Hola <strong>{firstName}</strong>! Tu cuenta ha sido creada exitosamente.</p>
-          <p>Ahora puedes acceder a todos nuestros servicios contables y tributarios personalizados.</p>
+          <p>Hello <strong>{firstName}</strong>! Your account has been created successfully.</p>
+          <p>You can now access all our accounting and tax services.</p>
         </div>
         
         <div className="thank-you-actions">
           <Link to="/" className="auth-button main-button">
             <FontAwesomeIcon icon={faHome} />
-            <span>Ir a la Página Principal</span>
+            <span>Go to home page</span>
           </Link>
         </div>
       </div>

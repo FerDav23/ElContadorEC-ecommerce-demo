@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import LoadingAnimation from './loadingAnimation';
+import { IS_DEMO_MODE } from '../config/demo.js';
 
 const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
   // Refs
@@ -27,11 +28,11 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
     }
   });
 
-  // Configuration
+  // Configuration: use env vars only; no secrets in repo. Demo mode does not use payment.
   const CONFIG = {
-    environment: 'stg',
-    application_code: 'TESTECUADORSTG-EC-CLIENT',
-    application_key: 'd4pUmVHgVpw2mJ66rWwtfWaO2bAWV6'
+    environment: import.meta.env.VITE_PAYMENTEZ_ENV || 'stg',
+    application_code: import.meta.env.VITE_PAYMENTEZ_APP_CODE || '',
+    application_key: import.meta.env.VITE_PAYMENTEZ_APP_KEY || ''
   };
 
   const userStr = localStorage.getItem('user');
@@ -64,7 +65,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
 
   // Get tokenization data
   const getTokenizeData = () => ({
-    locale: 'es',
+    locale: 'en',
     user: {
       //add real user ID and email
       id: userId,
@@ -79,7 +80,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
   const handleNotCompletedForm = (message) => {
     setState(prev => ({
       ...prev,
-      responseText: 'Por favor complete el formulario',
+      responseText: 'Please complete the form',
       ui: {
         ...prev.ui,
         isSubmitBtnDisabled: false
@@ -87,7 +88,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
     }));
     
     if (submitBtnRef.current) {
-      submitBtnRef.current.innerText = "Guardar tarjeta";
+      submitBtnRef.current.innerText = "Save card";
     }
   };
 
@@ -160,24 +161,25 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
     }
   };
 
-  // Initialize payment gateway
-  useEffect(() => {   
+  // Initialize payment gateway (only when credentials are present)
+  useEffect(() => {
     if (!state.loaded || state.paymentGateway !== null || state.scriptError) return;
-    
-    try {   
+    if (!CONFIG.application_code || !CONFIG.application_key) return;
+
+    try {
       const pg = new PaymentGateway(
         CONFIG.environment,
         CONFIG.application_code,
         CONFIG.application_key
       );
-      
+
       setState(prev => ({ ...prev, paymentGateway: pg }));
     } catch (error) {
       console.error('Failed to initialize payment gateway:', error);
-      setState(prev => ({ 
-        ...prev, 
-        scriptError: true, 
-        responseText: 'Error al inicializar el procesador de pagos'
+      setState(prev => ({
+        ...prev,
+        scriptError: true,
+        responseText: 'Error initializing payment processor'
       }));
     }
   }, [state.loaded, state.paymentGateway, state.scriptError]);
@@ -194,7 +196,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
     }));
 
     if (submitBtnRef.current) {
-      submitBtnRef.current.innerText = 'Procesando...';
+      submitBtnRef.current.innerText = 'Processing...';
     }
     
     if (state.paymentGateway) {
@@ -215,7 +217,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
         }));
         
         if (submitBtnRef.current) {
-          submitBtnRef.current.innerText = 'Guardar tarjeta';
+          submitBtnRef.current.innerText = 'Save card';
         }
       }
     }
@@ -223,7 +225,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
 
   const handleNewCardClick = () => {
     if (submitBtnRef.current) {
-      submitBtnRef.current.innerText = 'Guardar tarjeta';
+      submitBtnRef.current.innerText = 'Save card';
     }
 
     setState(prev => ({
@@ -292,15 +294,26 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
     }
   }, [state.responseText]);
 
-  // Initial script load
-  useEffect(() => {   
+  // Initial script load: skip in demo mode
+  useEffect(() => {
+    if (IS_DEMO_MODE) return;
     loadScript();
     return () => {
-      if (scriptRef.current) {
+      if (scriptRef.current && scriptRef.current.parentNode) {
         document.body.removeChild(scriptRef.current);
       }
     };
   }, []);
+
+  if (IS_DEMO_MODE) {
+    return (
+      <div style={{ ...styles.container, ...styles.paymentExampleDiv }} id="payment_example_div">
+        <div style={styles.demoMessage}>
+          Payment is disabled in this demo. No real charges or card data are used.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -308,7 +321,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
       <div style={{...styles.container, ...styles.paymentExampleDiv}} id="payment_example_div">
         {state.scriptError && (
           <div style={styles.errorMessage}>
-            Error al cargar el procesador de pagos. Por favor, recargue la página o intente más tarde.
+            Error loading payment processor. Please refresh the page or try again later.
           </div>
         )}
         <div 
@@ -330,7 +343,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
             className={`token-btn`}
             style={{ display: state.ui.showSubmitBtn ? 'block' : 'none' }}
           >
-            Guardar tarjeta
+            Save card
           </button> 
           <button 
             id="newCard_btn" 
@@ -339,7 +352,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
             className={`token-btn`}
             style={{ display: state.ui.showNewCardBtn ? 'block' : 'none' }}
           >
-            Agregar tarjeta
+            Add card
           </button>
           <button 
             id="cancel_btn" 
@@ -348,7 +361,7 @@ const TokenizationForm = ({setLoadingNewCard, setLoadCards}) => {
             className={`token-btn cancel`}
             style={{ display: state.ui.showCancelBtn ? 'block' : 'none' }}
           >
-            Cancelar
+            Cancel
           </button>
         </div>
       </div>
@@ -393,6 +406,13 @@ const styles = {
     color: 'red',
     textAlign: 'center',
     marginBottom: '10px',
+  },
+  demoMessage: {
+    padding: '16px',
+    textAlign: 'center',
+    backgroundColor: '#f0f4f8',
+    borderRadius: '8px',
+    color: '#555',
   },
 };
 

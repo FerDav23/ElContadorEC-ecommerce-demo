@@ -1,30 +1,30 @@
 import { useState, useEffect } from 'react';
-
-// URL base de la API
 import { API_BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_SUBCATEGORIAS } from '../mock/data.js';
 
 /**
- * Hook personalizado para obtener todas las subcategorías
- * @returns {Object} - Objeto con las subcategorías, estado de carga y error, y funciones para manipular subcategorías
+ * Hook to fetch subcategorías; uses mock data in demo mode.
  */
 const useSubcategorias = () => {
   const [subcategorias, setSubcategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Función para obtener todas las subcategorías
   const fetchAllSubcategorias = async () => {
+    setLoading(true);
+    if (IS_DEMO_MODE) {
+      setSubcategorias(MOCK_SUBCATEGORIAS);
+      setError(null);
+      setLoading(false);
+      return MOCK_SUBCATEGORIAS;
+    }
     try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/subcategorias`, {
-        credentials: 'include' // Include cookies for authentication
-      });
-      
+      const response = await fetch(`${API_BASE_URL}/subcategorias`, { credentials: 'include' });
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
-      
       const data = await response.json();
       setSubcategorias(data);
       setError(null);
@@ -190,28 +190,28 @@ export const useSubcategoriasByServicio = (servicioId) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Función para obtener subcategorías por servicio
   const fetchSubcategorias = async () => {
     if (!servicioId) {
       setSubcategorias([]);
       setLoading(false);
       return;
     }
-
+    setLoading(true);
+    setError(null);
+    if (IS_DEMO_MODE) {
+      const sid = parseInt(servicioId);
+      setSubcategorias(MOCK_SUBCATEGORIAS.filter(s => s.id_servicio === sid));
+      setLoading(false);
+      return;
+    }
     try {
-      setLoading(true);
-      setError(null);
-      
       const response = await fetch(`${API_BASE_URL}/subcategorias/servicio/${servicioId}`);
-      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
-      
       const data = await response.json();
       setSubcategorias(data);
-      
     } catch (err) {
       console.error(`Error fetching subcategorias for servicio ${servicioId}:`, err);
       setError(err.message);

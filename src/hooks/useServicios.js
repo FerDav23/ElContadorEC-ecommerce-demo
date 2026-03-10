@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_SERVICIOS, getMockServiciosWithItems } from '../mock/data.js';
 
 /**
- * Hook personalizado para obtener servicios por categoría
- * @param {string} categoriaId - ID de la categoría a buscar
- * @returns {Object} - Objeto con los servicios, estado de carga y error
+ * Hook to fetch services by category; uses mock data in demo mode.
  */
 const useServicios = (categoriaId) => {
   const [servicios, setServicios] = useState([]);
@@ -13,14 +13,18 @@ const useServicios = (categoriaId) => {
 
   useEffect(() => {
     const fetchServicios = async () => {
+      setLoading(true);
+      if (IS_DEMO_MODE && categoriaId) {
+        const catId = parseInt(categoriaId);
+        setServicios(MOCK_SERVICIOS.filter(s => s.id_categoria === catId));
+        setError(null);
+        setLoading(false);
+        return;
+      }
+      if (!categoriaId) { setLoading(false); return; }
       try {
-        setLoading(true);
         const response = await fetch(`${API_BASE_URL}/servicios/categoria/${categoriaId}`);
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
         const data = await response.json();
         setServicios(data);
         setError(null);
@@ -33,29 +37,30 @@ const useServicios = (categoriaId) => {
       }
     };
 
-    if (categoriaId) {
-      fetchServicios();
-    }
+    fetchServicios();
   }, [categoriaId]);
 
   return { servicios, loading, error };
 };
 
 /**
- * Hook personalizado para obtener todos los servicios con sus subcategorías
- * @returns {Object} - Objeto con los servicios, estado de carga y error
+ * Hook to fetch all services with subcategorías; uses mock data in demo mode.
  */
 export const useAllServicios = () => {
   const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Función para obtener todos los servicios con sus subcategorías
+
   const fetchAllServicios = async () => {
+    setLoading(true);
+    if (IS_DEMO_MODE) {
+      const data = getMockServiciosWithItems();
+      setServicios(data);
+      setError(null);
+      setLoading(false);
+      return { success: true, data };
+    }
     try {
-      setLoading(true);
-      
-      // Get all services (already includes Items with Subcategoria data)
       const serviciosResponse = await fetch(`${API_BASE_URL}/servicios`);
       if (!serviciosResponse.ok) {
         throw new Error(`Error fetching services: ${serviciosResponse.status}`);

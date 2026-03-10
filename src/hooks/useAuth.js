@@ -1,28 +1,55 @@
-// Verificado
-
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { DEMO_USERS } from '../mock/data.js';
 
 /**
- * Hook personalizado para manejar autenticación de usuarios
- * @returns {Object} - Objeto con funciones y estados de autenticación
+ * Auth hook: real API or demo login (loginDemo) when IS_DEMO_MODE.
  */
 const useAuth = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [adminStatus, setAdminStatus] = useState(false);
-  const [adminStatusVerified, setAdminStatusVerified] = useState(false);
+  const [adminStatus, setAdminStatus] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (!stored) return false;
+      const u = JSON.parse(stored);
+      return IS_DEMO_MODE && u.token?.startsWith('demo-token-') ? !!u.isAdmin : false;
+    } catch {
+      return false;
+    }
+  });
+  const [adminStatusVerified, setAdminStatusVerified] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (!stored) return false;
+      const u = JSON.parse(stored);
+      return IS_DEMO_MODE && u.token?.startsWith('demo-token-');
+    } catch {
+      return false;
+    }
+  });
 
-  // Verificar si hay un usuario en localStorage al cargar
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
-        // We'll verify admin status separately with the server
-        verifyAdminStatus();
+        if (IS_DEMO_MODE && parsedUser.token && parsedUser.token.startsWith('demo-token-')) {
+          setAdminStatus(parsedUser.isAdmin === true);
+          setAdminStatusVerified(true);
+        } else {
+          verifyAdminStatus();
+        }
       } catch (err) {
         localStorage.removeItem('user');
         localStorage.removeItem('authToken');
@@ -36,15 +63,20 @@ const useAuth = () => {
    * @returns {Promise<boolean>} - true si el usuario es administrador según el servidor
    */
   const verifyAdminStatus = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setAdminStatus(false);
+      setAdminStatusVerified(true);
+      return false;
+    }
+    if (IS_DEMO_MODE && token.startsWith('demo-token-')) {
+      const u = user || (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; }})();
+      const isAdmin = u && u.isAdmin === true;
+      setAdminStatus(isAdmin);
+      setAdminStatusVerified(true);
+      return isAdmin;
+    }
     try {
-      const token = localStorage.getItem('authToken');
-      
-      if (!token) {
-        setAdminStatus(false);
-        setAdminStatusVerified(true);
-        return false;
-      }
-
       const response = await fetch(`${API_BASE_URL}/users/verify-admin`, {
         method: 'GET',
         headers: {
@@ -76,6 +108,10 @@ const useAuth = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const login = async (credentials) => {
+    if (IS_DEMO_MODE) {
+      setError('Use "Sign in as Manager" or "Sign in as Client" on the demo home page.');
+      return { success: false, error: 'Use demo role chooser.' };
+    }
     try {
       setLoading(true);
       setError(null);
@@ -117,6 +153,10 @@ const useAuth = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const register = async (userData) => {
+    if (IS_DEMO_MODE) {
+      setError('Registration is disabled in demo. Use "Sign in as Client" to explore.');
+      return { success: false, error: 'Registration disabled in demo.' };
+    }
     try {
       setLoading(true);
       setError(null);
@@ -195,14 +235,18 @@ const useAuth = () => {
    * @returns {Promise<Object>} - Datos del perfil del usuario
    */
   const getUserProfile = async () => {
+    if (IS_DEMO_MODE) {
+      const u = user || (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; }})();
+      if (u) return { success: true, data: u };
+      return { success: false, error: 'Not logged in' };
+    }
     try {
       setLoading(true);
       setError(null);
 
       const token = localStorage.getItem('authToken');
-      
       if (!token) {
-        throw new Error('No hay token de autenticación');
+        throw new Error('No authentication token');
       }
 
       const response = await fetch(`${API_BASE_URL}/users/profile`, {
@@ -233,6 +277,22 @@ const useAuth = () => {
     }
   };
 
+  /**
+   * Demo only: sign in as manager or client without backend.
+   * @param {'manager' | 'client'} role
+   */
+  const loginDemo = (role) => {
+    if (!IS_DEMO_MODE) return;
+    const demoUser = role === 'manager' ? DEMO_USERS.manager : DEMO_USERS.client;
+    const payload = { ...demoUser };
+    localStorage.setItem('authToken', payload.token);
+    localStorage.setItem('user', JSON.stringify(payload));
+    setUser(payload);
+    setAdminStatus(payload.isAdmin === true);
+    setAdminStatusVerified(true);
+    setError(null);
+  };
+
   return {
     user,
     loading,
@@ -240,6 +300,7 @@ const useAuth = () => {
     login,
     register,
     logout,
+    loginDemo,
     isAuthenticated,
     isAdmin,
     getUserProfile,

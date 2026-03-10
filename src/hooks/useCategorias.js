@@ -1,13 +1,10 @@
-// Verificado
-
 import { useState, useEffect } from 'react';
-
-// URL base de la API
 import { API_BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_CATEGORIAS } from '../mock/data.js';
 
 /**
- * Hook personalizado para obtener todas las categorías de servicios
- * @returns {Object} - Objeto con las categorías, estado de carga, error y funciones CRUD
+ * Hook to fetch categories; uses mock data in demo mode.
  */
 const useCategorias = () => {
   const [categorias, setCategorias] = useState([]);
@@ -16,26 +13,21 @@ const useCategorias = () => {
 
   useEffect(() => {
     const fetchCategorias = async () => {
+      setLoading(true);
+      if (IS_DEMO_MODE) {
+        setCategorias(MOCK_CATEGORIAS.map(c => ({ ...c, color: c.color || '#000000' })));
+        setError(null);
+        setLoading(false);
+        return;
+      }
       try {
-        setLoading(true);
         const response = await fetch(`${API_BASE_URL}/categorias`);
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
         const data = await response.json();
-        // If any category doesn't have a color property, add default black
-        const dataWithColors = data.map(categoria => {
-          if (!categoria.color) {
-            return {
-              ...categoria,
-              color: '#000000' // Default black color
-            };
-          }
-          return categoria;
-        });
-        
+        const dataWithColors = data.map(categoria => ({
+          ...categoria,
+          color: categoria.color || '#000000'
+        }));
         setCategorias(dataWithColors);
         setError(null);
       } catch (err) {
@@ -56,14 +48,11 @@ const useCategorias = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const createCategoria = async (categoriaData) => {
+    if (IS_DEMO_MODE) return { success: true, data: { ...categoriaData, id_categoria: Date.now(), color: categoriaData.color || '#000000' } };
     try {
       setLoading(true);
-      
-      // Get authentication token
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       
       // If no color is provided, use default black
       if (!categoriaData.color) {
@@ -110,14 +99,11 @@ const useCategorias = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const updateCategoria = async (id, categoriaData) => {
+    if (IS_DEMO_MODE) return { success: true, data: { ...categoriaData, id_categoria: parseInt(id) } };
     try {
       setLoading(true);
-      
-      // Get authentication token
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       
       // If not updating color, keep the existing one
       if (!categoriaData.color) {
@@ -172,14 +158,14 @@ const useCategorias = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const deleteCategoria = async (id) => {
+    if (IS_DEMO_MODE) {
+      setCategorias(prev => prev.filter(c => c.id_categoria !== parseInt(id)));
+      return { success: true };
+    }
     try {
       setLoading(true);
-      
-      // Get authentication token
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       
       // Ensure ID is a number
       const categoryId = parseInt(id);

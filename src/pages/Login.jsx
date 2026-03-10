@@ -40,14 +40,13 @@ const Login = () => {
     
     // Email validation
     if (!formData.correo) {
-      errors.correo = 'El correo electrónico es requerido';
+      errors.correo = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.correo)) {
-      errors.correo = 'El correo electrónico no es válido';
+      errors.correo = 'Please enter a valid email';
     }
     
-    // Password validation
     if (!formData.password) {
-      errors.password = 'La contraseña es requerida';
+      errors.password = 'Password is required';
     }
     
     setFormErrors(errors);
@@ -66,13 +65,13 @@ const Login = () => {
         const result = await login(formData);
         
         if (!result.success) {
-          setLoginError(result.error || 'Error al iniciar sesión. Verifica tus credenciales.');
+          setLoginError(result.error || 'Sign in failed. Please check your credentials.');
         } else {
           // Block redirect until we're ready
           setAllowRedirect(false);
           
           // Show success message
-          setLoginSuccess(`¡Bienvenido/a de nuevo, ${result.data.nombres?.split(' ')[0] || 'Usuario'}!`);
+          setLoginSuccess(`Welcome back, ${result.data.nombres?.split(' ')[0] || 'User'}!`);
           
           // Refresh the page to update user info everywhere
           setTimeout(() => {
@@ -80,7 +79,7 @@ const Login = () => {
           }, 1200);
         }
       } catch (error) {
-        setLoginError('Error al conectar con el servidor. Inténtalo de nuevo.');
+        setLoginError('Error connecting to the server. Please try again.');
         console.error('Login error:', error);
       } finally {
         setIsSubmitting(false);
@@ -92,8 +91,8 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Iniciar Sesión</h2>
-          <p>Ingresa tus credenciales para continuar</p>
+          <h2>Sign In</h2>
+          <p>Enter your credentials to continue</p>
         </div>
         
         {loginError && (
@@ -111,7 +110,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="correo">
-              <FontAwesomeIcon icon={faEnvelope} /> Correo Electrónico
+              <FontAwesomeIcon icon={faEnvelope} /> Email
             </label>
             <input
               type="email"
@@ -119,7 +118,7 @@ const Login = () => {
               name="correo"
               value={formData.correo}
               onChange={handleChange}
-              placeholder="correo@ejemplo.com"
+              placeholder="email@example.com"
               className={formErrors.correo ? 'error' : ''}
               autoComplete="email"
             />
@@ -128,7 +127,7 @@ const Login = () => {
           
           <div className="form-group">
             <label htmlFor="password">
-              <FontAwesomeIcon icon={faLock} /> Contraseña
+              <FontAwesomeIcon icon={faLock} /> Password
             </label>
             <input
               type="password"
@@ -136,7 +135,7 @@ const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Tu contraseña"
+              placeholder="Your password"
               className={formErrors.password ? 'error' : ''}
               autoComplete="current-password"
             />
@@ -150,18 +149,18 @@ const Login = () => {
           >
             {isSubmitting ? (
               <>
-                <FontAwesomeIcon icon={faSpinner} spin /> Procesando...
+                <FontAwesomeIcon icon={faSpinner} spin /> Signing in...
               </>
             ) : (
               <>
-                <FontAwesomeIcon icon={faSignInAlt} /> Iniciar Sesión
+                <FontAwesomeIcon icon={faSignInAlt} /> Sign In
               </>
             )}
           </button>
         </form>
         
         <div className="auth-footer">
-          <p>¿No tienes una cuenta? <Link to="/register">Regístrate ahora</Link></p>
+          <p>Don&apos;t have an account? <Link to="/register">Register now</Link></p>
         </div>
       </div>
     </div>

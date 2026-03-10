@@ -153,13 +153,13 @@ const Perfil = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al actualizar perfil');
+        throw new Error(data.message || 'Error updating profile');
       }
 
       // Update the full profile with new data
       setFullUserProfile(data);
       setIsEditMode(false);
-      setSuccessMessage('Perfil actualizado correctamente');
+      setSuccessMessage('Profile updated successfully');
       
       // Clear success message after a few seconds
       setTimeout(() => {
@@ -208,7 +208,7 @@ const Perfil = () => {
     return (
       <div className="perfil-loading">
         <FontAwesomeIcon icon={faSpinner} spin />
-        <p>Cargando información de perfil...</p>
+        <p>Loading profile...</p>
       </div>
     );
   }
@@ -222,7 +222,7 @@ const Perfil = () => {
               <div className="sidebar-icon-circle">
                 <FontAwesomeIcon icon={faUser} />
               </div>
-              Mi perfil
+              My profile
             </li>
             <li className="has-sub">
               <div className="sidebar-icon-circle-gray">
@@ -231,15 +231,15 @@ const Perfil = () => {
               Mis pedidos
             </li>
             <ul className="sidebar-sub">
-              <li>Pedidos pendientes</li>
-              <li>Pedidos completados</li>
+              <li>Pending orders</li>
+              <li>Completed orders</li>
             </ul>
             <li className="sidebar-logout">
-              <button type="button" className="logout-btn" onClick={() => { logout(); window.location.href = '/'; }}>
+              <button type="button" className="logout-btn" onClick={() => { logout(); window.location.replace('/'); }}>
                 <div className="sidebar-icon-circle-logout">
                   <FontAwesomeIcon icon={faTools} />
                 </div>
-                Cerrar sesión
+                Sign out
                   </button>
             </li>
             {isUserAdmin && (
@@ -248,15 +248,15 @@ const Perfil = () => {
                   <div className="admin-icon">
                     <FontAwesomeIcon icon={faUserCog} />
                   </div>
-                  Panel de Administración
+                  Admin Panel
                 </Link>
               </li>
             )}
           </ul>
         </aside>
         <div className="perfil-content">
-          <h2 className="perfil-title">Mi perfil</h2>
-          <p className="perfil-subtitle">Aquí podrás actualizar la información de tu cuenta</p>
+          <h2 className="perfil-title">My profile</h2>
+          <p className="perfil-subtitle">Here you can update your account information</p>
           
           {successMessage && (
             <div className="perfil-success-message">
@@ -273,18 +273,18 @@ const Perfil = () => {
             <div className="perfil-card">
               <div className="perfil-avatar-big">
                 <img src={displayImage} alt="avatar" />
-                <button className="perfil-avatar-edit">Editar</button>
+                <button className="perfil-avatar-edit">Edit</button>
               </div>
               <div className="perfil-card-info">
                 <div className="perfil-card-header">
                   <span className="perfil-card-name">{formatFullName()}</span>
                   {!isEditMode ? (
-                    <button className="perfil-card-edit-btn" onClick={handleEditClick}>Editar</button>
+                    <button className="perfil-card-edit-btn" onClick={handleEditClick}>Edit</button>
                   ) : (
-                    <button className="perfil-card-edit-btn" onClick={handleCancel}>Cancelar</button>
+                    <button className="perfil-card-edit-btn" onClick={handleCancel}>Cancel</button>
                   )}
                 </div>
-                <div className="perfil-card-sub">Apellidos y Nombre</div>
+                <div className="perfil-card-sub">Full name</div>
                 <div className="perfil-card-fields">
                 <div>
                     {isEditMode ? (
@@ -309,12 +309,12 @@ const Perfil = () => {
                         value={editData.numero_documento}
                         onChange={handleChange}
                         className="perfil-field-input"
-                        placeholder="Cédula/RUC"
+                        placeholder="ID / Tax ID"
                       />
                     ) : (
                       <div className={!fullUserProfile?.numero_documento ? 'perfil-field-na' : ''}>{fullUserProfile?.numero_documento || 'NA'}</div>
                     )}
-                    <div className="perfil-card-label">Cédula/RUC</div>
+                    <div className="perfil-card-label">ID / Tax ID</div>
                   </div>
                   <div>
                     {isEditMode ? (
@@ -324,12 +324,12 @@ const Perfil = () => {
                         value={editData.telefono}
                         onChange={handleChange}
                         className="perfil-field-input"
-                        placeholder="Celular"
+                        placeholder="Phone"
                       />
                     ) : (
                       <div className={!fullUserProfile?.telefono ? 'perfil-field-na' : ''}>{fullUserProfile?.telefono || 'NA'}</div>
                     )}
-                    <div className="perfil-card-label">Celular</div>
+                    <div className="perfil-card-label">Phone</div>
                   </div>
                   <div>
                     {isEditMode ? (
@@ -339,12 +339,12 @@ const Perfil = () => {
                         value={editData.ciudad}
                         onChange={handleChange}
                         className="perfil-field-input"
-                        placeholder="Ciudad"
+                        placeholder="City"
                       />
                     ) : (
                       <div className={!fullUserProfile?.ciudad ? 'perfil-field-na' : ''}>{fullUserProfile?.ciudad || 'NA'}</div>
                     )}
-                    <div className="perfil-card-label">Ciudad</div>
+                    <div className="perfil-card-label">City</div>
                   </div>
                 </div>
                 {isEditMode && (
@@ -353,7 +353,7 @@ const Perfil = () => {
                     onClick={handleSave}
                     disabled={editing}
                   >
-                    {editing ? 'Guardando...' : 'Guardar'} <FontAwesomeIcon icon={faCheckCircle} />
+                    {editing ? 'Saving...' : 'Save'} <FontAwesomeIcon icon={faCheckCircle} />
                   </button>
                 )}
               </div>

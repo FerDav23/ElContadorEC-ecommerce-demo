@@ -681,7 +681,7 @@ const AdminPanel = () => {
   return (
     <div className={styles['admin-panel-container']}>
       {(deleteCategoryState.isLoading || loading || serviciosLoading || categoriasLoading) && <LoadingAnimation />}
-      <h1 className={styles['admin-panel-title']}>Panel de Administración</h1>
+      <h1 className={styles['admin-panel-title']}>Admin Panel</h1>
       
       <div className={styles['search-filters']}>
         <div className={styles['search-filters-content']}>
@@ -697,7 +697,7 @@ const AdminPanel = () => {
                   <input
                     type="text"
                     name="searchTerm"
-                    placeholder="Nombre servicio o categoría..."
+                    placeholder="Service or category name..."
                     value={filters.searchTerm}
                     onChange={handleFilterChange}
                     className={styles['search-input']}
@@ -731,7 +731,7 @@ const AdminPanel = () => {
                     onChange={handleFilterChange}
                     className={styles['filter-select']}
                   >
-                    <option value="all">Todas las categorías</option>
+                    <option value="all">All categories</option>
                     {allCategorias.map(categoria => (
                       <option key={categoria.id_categoria} value={categoria.id_categoria}>
                         {categoria.nombre}
@@ -755,7 +755,7 @@ const AdminPanel = () => {
                     onChange={handleFilterChange}
                     className={styles['filter-select']}
                   >
-                    <option value="all">Todos los servicios</option>
+                    <option value="all">All services</option>
                     {allServicios.map(servicio => (
                       <option key={servicio.id_servicio} value={servicio.id_servicio}>
                         {servicio.nombre}
@@ -852,7 +852,7 @@ const AdminPanel = () => {
               className={styles['manage-caracteristicas-button']}
               onClick={() => setVerCaracteristicasState({ show: true })}
             >
-              <FontAwesomeIcon icon={faListAlt} /> Gestionar Características
+              <FontAwesomeIcon icon={faListAlt} /> Manage characteristics
           </button>
             <button 
               className={styles['banner-upload-button']}
@@ -868,7 +868,7 @@ const AdminPanel = () => {
         ) : (
           <div className={styles['items-list']}>
             {filteredItems.length === 0 && filters.categoriaId === 'all' ? (
-              <p className={styles['no-data']}>No hay ítems que coincidan con los criterios de búsqueda</p>
+              <p className={styles['no-data']}>No items match the search criteria</p>
             ) : (
               // Start with all categories and add their services
               allCategorias
@@ -922,7 +922,7 @@ const AdminPanel = () => {
                           <button 
                             className={styles['icon-picker-button']}
                             onClick={(e) => handleOpenIconPicker(e, category.id, category.name, category.icon, setChangeCategoryIconState)}
-                            title="Cambiar icono de la categoría"
+                            title="Change category icon"
                             style={{ 
                               background: 'rgba(255, 255, 255, 0.2)',
                               color: '#fff',
@@ -944,7 +944,7 @@ const AdminPanel = () => {
                       <button 
                         className={styles['color-picker-button']}
                         onClick={(e) => handleOpenColorPicker(e, category.id, category.name, category.color, setColorPickerState)}
-                        title="Cambiar color de la categoría"
+                        title="Change category color"
                         style={{ 
                           background: 'rgba(255, 255, 255, 0.2)',
                           color: '#fff',
@@ -969,7 +969,7 @@ const AdminPanel = () => {
                           e.stopPropagation();
                           handleDeleteCategory(category.id, category.name, category.services.length, setDeleteCategoryState);
                         }}
-                        title="Eliminar categoría y todos sus servicios"
+                        title="Delete category and all its services"
                         style={{ 
                           background: 'rgba(255, 255, 255, 0.2)',
                           color: '#fff',
@@ -1043,7 +1043,7 @@ const AdminPanel = () => {
                                     isLoading: false
                                   });
                                 }}
-                                    title="Editar servicio (nombre y descripción)"
+                                    title="Edit service (name and description)"
                               >
                                 <FontAwesomeIcon icon={faEdit} />
                               </button>
@@ -1053,7 +1053,7 @@ const AdminPanel = () => {
                                   e.stopPropagation();
                                   handleOpenServiceImageModal(servicio, category);
                                 }}
-                                title="Gestionar imagen del servicio"
+                                title="Manage service image"
                               >
                                 <FontAwesomeIcon icon={faImage} />
                               </button>
@@ -1063,7 +1063,7 @@ const AdminPanel = () => {
                                   e.stopPropagation();
                                   handleDelete('servicio', servicio.id_servicio);
                                 }}
-                                title="Eliminar servicio completo"
+                                title="Delete service"
                               >
                                 <FontAwesomeIcon icon={faTrash} />
                               </button>
@@ -1119,7 +1119,7 @@ const AdminPanel = () => {
                                           setCurrentEditItem(item);
                                           setShowItemForm(true);
                                         }}
-                                        title="Editar ítem"
+                                        title="Edit item"
                                       >
                                         <FontAwesomeIcon icon={faEdit} />
                                       </button>
@@ -1129,7 +1129,7 @@ const AdminPanel = () => {
                                           e.stopPropagation();
                                           handleDelete('item', item.id_items || item.id_item);
                                         }}
-                                        title="Eliminar ítem"
+                                        title="Delete item"
                                       >
                                         <FontAwesomeIcon icon={faTrash} />
                                       </button>

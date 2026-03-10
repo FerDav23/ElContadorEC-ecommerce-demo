@@ -2,48 +2,39 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAllServicios } from './useServicios';
 import useSubcategorias from './useSubcategorias';
 import { API_BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_ITEMS } from '../mock/data.js';
 
 /**
- * Hook personalizado para obtener items con información relacionada
- * @returns {Object} - Objeto con los items, servicios, subcategorias, estado de carga y error
+ * Hook to fetch items with related details; uses mock data in demo mode.
  */
 const useItems = () => {
   const [items, setItems] = useState([]);
   const [itemsWithDetails, setItemsWithDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { 
-    servicios: allServicios, 
-    loading: serviciosLoading,
-    createServicio 
-  } = useAllServicios();
-  const { 
-    subcategorias: allSubcategorias,
-    createSubcategoria 
-  } = useSubcategorias();
+  const { servicios: allServicios, loading: serviciosLoading, createServicio } = useAllServicios();
+  const { subcategorias: allSubcategorias, createSubcategoria } = useSubcategorias();
 
-  // Function to fetch items into the items state
   const fetchItems = useCallback(async () => {
+    setLoading(true);
+    if (IS_DEMO_MODE) {
+      setItems(MOCK_ITEMS);
+      setError(null);
+      setLoading(false);
+      return { success: true };
+    }
     try {
-      setLoading(true);
       const response = await fetch(`${API_BASE_URL}/items`);
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-      
+      if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
       const data = await response.json();
       setItems(data);
       setError(null);
-      
-      // Return success to let callers know items were refreshed
       return { success: true };
     } catch (err) {
       console.error('Error fetching items:', err);
       setError(err.message);
       setItems([]);
-      
-      // Return failure to let callers know refresh failed
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
@@ -67,7 +58,7 @@ const useItems = () => {
         const servicio = allServicios.find(s => s.id_servicio === item.id_servicio);
         
         // Find the corresponding subcategoria for this item
-        let subcategoriaNombre = 'Desconocido';
+        let subcategoriaNombre = 'Unknown';
         if (item.subcategoria_nombre) {
           // If item already has subcategoria_nombre, use it
           subcategoriaNombre = item.subcategoria_nombre;
@@ -85,7 +76,7 @@ const useItems = () => {
           // Add an alias for id_items as id_item to handle both field names
           id_item: item.id_items || item.id_item,
           // Include servicio details if available
-          servicio_nombre: servicio ? servicio.nombre : 'Desconocido',
+          servicio_nombre: servicio ? servicio.nombre : 'Unknown',
           // Use subcategoria name determined above
           subcategoria_nombre: subcategoriaNombre,
           // Include categoria details if available

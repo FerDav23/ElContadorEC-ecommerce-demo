@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-
-// URL base de la API
 import { API_BASE_URL } from '../config/api.js';
+import { IS_DEMO_MODE } from '../config/demo.js';
+import { MOCK_CARACTERISTICAS, MOCK_CARACTERISTICAS_BY_SERVICIO } from '../mock/data.js';
 
 /**
- * Hook personalizado para obtener y gestionar características
- * @returns {Object} - Objeto con las características, estado de carga, error y funciones CRUD
+ * Hook to fetch and manage características; uses mock data in demo mode.
  */
 const useCaracteristicas = () => {
   const [caracteristicas, setCaracteristicas] = useState([]);
@@ -13,27 +12,28 @@ const useCaracteristicas = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
+    if (IS_DEMO_MODE) {
+      setCaracteristicas(MOCK_CARACTERISTICAS);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     const fetchCaracteristicas = async () => {
       try {
-        setLoading(true);
         const response = await fetch(`${API_BASE_URL}/caracteristicas`);
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
         const data = await response.json();
         setCaracteristicas(data);
         setError(null);
       } catch (err) {
-        console.error('Error al obtener características:', err);
+        console.error('Error fetching características:', err);
         setError(err.message);
         setCaracteristicas([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCaracteristicas();
   }, []);
 
@@ -43,18 +43,18 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const getCaracteristicaById = async (id) => {
+    if (IS_DEMO_MODE) {
+      const c = MOCK_CARACTERISTICAS.find((x) => x.id_caracteristica === parseInt(id));
+      return c ? { success: true, data: c } : { success: false, error: 'Not found' };
+    }
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/caracteristicas/${id}`);
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-      
+      if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
       const caracteristica = await response.json();
       return { success: true, data: caracteristica };
     } catch (err) {
-      console.error(`Error al obtener característica #${id}:`, err);
+      console.error('Error fetching característica:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -68,18 +68,20 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const getServiciosByCaracteristica = async (id) => {
+    if (IS_DEMO_MODE) {
+      const servicioIds = Object.entries(MOCK_CARACTERISTICAS_BY_SERVICIO)
+        .filter(([, arr]) => arr.some((c) => c.id_caracteristica === parseInt(id)))
+        .map(([sid]) => ({ id_servicio: parseInt(sid) }));
+      return { success: true, data: servicioIds };
+    }
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/caracteristicas/${id}/servicios`);
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-      
+      if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
       const servicios = await response.json();
       return { success: true, data: servicios };
     } catch (err) {
-      console.error(`Error al obtener servicios para la característica #${id}:`, err);
+      console.error('Error fetching servicios for característica:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -93,15 +95,17 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const createCaracteristica = async (caracteristicaData) => {
+    if (IS_DEMO_MODE) {
+      const newId =
+        (caracteristicas.length ? Math.max(...caracteristicas.map((c) => c.id_caracteristica)) : 0) + 1;
+      const newCar = { id_caracteristica: newId, ...caracteristicaData };
+      setCaracteristicas((prev) => [...prev, newCar]);
+      return { success: true, data: newCar };
+    }
     try {
       setLoading(true);
-      
-      // Obtener token de autenticación
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
-      
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       const response = await fetch(`${API_BASE_URL}/caracteristicas`, {
         method: 'POST',
         headers: {
@@ -137,15 +141,16 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const updateCaracteristica = async (id, caracteristicaData) => {
+    if (IS_DEMO_MODE) {
+      setCaracteristicas((prev) =>
+        prev.map((c) => (c.id_caracteristica === parseInt(id) ? { ...c, ...caracteristicaData } : c))
+      );
+      return { success: true, data: { id_caracteristica: parseInt(id), ...caracteristicaData } };
+    }
     try {
       setLoading(true);
-      
-      // Obtener token de autenticación
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
-      
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       const response = await fetch(`${API_BASE_URL}/caracteristicas/${id}`, {
         method: 'PUT',
         headers: {
@@ -184,15 +189,14 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const deleteCaracteristica = async (id) => {
+    if (IS_DEMO_MODE) {
+      setCaracteristicas((prev) => prev.filter((c) => c.id_caracteristica !== parseInt(id)));
+      return { success: true };
+    }
     try {
       setLoading(true);
-      
-      // Obtener token de autenticación
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
-      
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       const response = await fetch(`${API_BASE_URL}/caracteristicas/${id}`, {
         method: 'DELETE',
         headers: {
@@ -226,23 +230,12 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const addCaracteristicaToServicio = async (servicioId, caracteristicaId) => {
+    if (IS_DEMO_MODE) return { success: true, data: {} };
     try {
       setLoading(true);
-      
-      // Obtener token de autenticación
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
-      
-      // Try different possible request body formats
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       const requestBody = { id_caracteristicas: caracteristicaId };
-      console.log('Sending request to assign caracteristica:');
-      console.log('URL:', `${API_BASE_URL}/servicios/${servicioId}/caracteristicas`);
-      console.log('Body:', requestBody);
-      console.log('Service ID:', servicioId);
-      console.log('Caracteristica ID:', caracteristicaId);
-      
       const response = await fetch(`${API_BASE_URL}/servicios/${servicioId}/caracteristicas`, {
         method: 'POST',
         headers: {
@@ -297,15 +290,11 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const removeCaracteristicaFromServicio = async (servicioId, caracteristicaId) => {
+    if (IS_DEMO_MODE) return { success: true, data: {} };
     try {
       setLoading(true);
-      
-      // Obtener token de autenticación
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No hay token de autenticación. Inicie sesión como administrador.');
-      }
-      
+      if (!token) throw new Error('Authentication required. Sign in as administrator.');
       const response = await fetch(`${API_BASE_URL}/servicios/${servicioId}/caracteristicas/${caracteristicaId}`, {
         method: 'DELETE',
         headers: {
@@ -334,18 +323,19 @@ const useCaracteristicas = () => {
    * @returns {Promise<Object>} - Resultado de la operación
    */
   const getCaracteristicasByServicio = async (servicioId) => {
+    if (IS_DEMO_MODE) {
+      const sid = parseInt(servicioId);
+      const data = MOCK_CARACTERISTICAS_BY_SERVICIO[sid] || [];
+      return { success: true, data };
+    }
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/servicios/${servicioId}/caracteristicas`);
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-      
+      if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
       const caracteristicasServicio = await response.json();
       return { success: true, data: caracteristicasServicio };
     } catch (err) {
-      console.error(`Error al obtener características del servicio #${servicioId}:`, err);
+      console.error('Error fetching características for service:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -353,16 +343,17 @@ const useCaracteristicas = () => {
     }
   };
 
-  return { 
-    caracteristicas, 
-    loading, 
-    error, 
+  return {
+    caracteristicas,
+    loading,
+    error,
     getCaracteristicaById,
     getServiciosByCaracteristica,
-    createCaracteristica, 
-    updateCaracteristica, 
+    createCaracteristica,
+    updateCaracteristica,
     deleteCaracteristica,
     addCaracteristicaToServicio,
+    assignCaracteristicaToServicio: addCaracteristicaToServicio,
     removeCaracteristicaFromServicio,
     getCaracteristicasByServicio
   };
