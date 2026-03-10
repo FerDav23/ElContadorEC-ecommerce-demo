@@ -4,7 +4,9 @@ A **frontend-only demo** of an accounting and tax services web application. This
 
 ## Purpose
 
-This demo was built for a company to showcase the application’s UI and flows. Use it to:
+This demo was built for a company to showcase the application’s UI and flows. It is presented **with the company’s permission**, in a limited form: no sensitive information or architecture is shown (no real backend, credentials, or internal design).
+
+Use it to:
 
 - Browse categories and services
 - Sign in as **Manager** (admin) or **Client** to explore different roles
@@ -51,6 +53,29 @@ No real API keys, credentials, or payment data are stored in the repo. The demo 
 3. All data (categories, services, cart, cards) is mock. The payment step shows: *“Payment is disabled in this demo.”*
 
 4. To switch roles, sign out and choose the other role on the demo home screen.
+
+## How to access the Admin Panel
+
+1. **Sign in as Manager** on the demo home page (this signs you in as an admin).
+2. Go to **My profile** (click your name or “My orders” in the header, then open your profile).
+3. In the profile sidebar, click **Admin Panel**.
+
+### Screenshots
+
+*Demo home – choose "Sign in as Manager":*
+
+![Demo home – Sign in as Manager](docs/screenshot-demo-home.png)
+
+
+*My profile – sidebar with "Admin Panel" link:*
+
+![My profile – Admin Panel link](docs/screenshot-profile.png)
+
+
+*Admin Panel:*
+
+![Admin Panel](docs/screenshot-admin-panel.png)
+
 
 ## Scripts
 
