@@ -62,19 +62,15 @@ No real API keys, credentials, or payment data are stored in the repo. The demo 
 
 ### Screenshots
 
-*Demo home – choose "Sign in as Manager":*
-
-![Demo home – Sign in as Manager](docs/screenshot-demo-home.png)
-
-
 *My profile – sidebar with "Admin Panel" link:*
 
-![My profile – Admin Panel link](docs/screenshot-profile.png)
+<img width="1795" height="845" alt="image" src="https://github.com/user-attachments/assets/df0c3bb3-2b3d-4dad-aa61-c172c19e99ac" />
 
 
 *Admin Panel:*
 
-![Admin Panel](docs/screenshot-admin-panel.png)
+<img width="1927" height="839" alt="image" src="https://github.com/user-attachments/assets/c0f04946-3eb3-444a-910c-ab6809fc087c" />
+
 
 
 ## Scripts
